@@ -50,9 +50,9 @@ class Bird(pygame.sprite.Sprite):
             # Animation
             self.counter += 1
 
-            flappy_cooldown = 5
+            flap_cooldown = 5
 
-            if self.counter > flappy_cooldown:
+            if self.counter > flap_cooldown:
                 self.counter = 0
                 self.index += 1
                 
@@ -122,9 +122,11 @@ def main():
         bird_group.update(is_game_over)
 
         pipe_group.draw(screen)
-        pipe_group.update(ground_speed)
 
         screen.blit(ground_image, (ground_scroll, 768))
+
+        if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
+            is_game_over = True
 
         if flappy.rect.bottom >= 768:
             is_game_over = True
@@ -149,6 +151,8 @@ def main():
 
             if abs(ground_scroll) > 35:
                 ground_scroll = 0
+            
+            pipe_group.update(ground_speed)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
