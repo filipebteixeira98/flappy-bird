@@ -12,8 +12,8 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Flappy Bird")
 
-    background_image = pygame.image.load('assets/sprites/bg.png')
-    ground_image = pygame.image.load('assets/sprites/ground.png')
+    background_image = pygame.image.load("assets/sprites/bg.png")
+    ground_image = pygame.image.load("assets/sprites/ground.png")
 
     ground_scroll = 0
     ground_speed = 4
