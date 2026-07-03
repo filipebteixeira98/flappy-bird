@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Environments / Secrets (Never commit API keys or passwords!)
+.env
+.secrets
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Common IDEs
+.vscode/
+.idea/
