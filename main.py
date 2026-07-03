@@ -23,16 +23,18 @@ class Bird(pygame.sprite.Sprite):
         self.rect.center = [x, y]
         self.velocity = 0
         self.clicked = False
+        self.flying = False
     
     def update(self):
         # Gravity
-        self.velocity += 0.5
+        if self.flying == True:
+            self.velocity += 0.5
 
-        if self.velocity > 8:
-            self.velocity = 8
+            if self.velocity > 8:
+                self.velocity = 8
 
-        if self.rect.bottom < 768:
-            self.rect.y += int(self.velocity)
+            if self.rect.bottom < 768:
+                self.rect.y += int(self.velocity)
 
         # Jump
         if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
@@ -97,6 +99,9 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            
+            if event.type == pygame.MOUSEBUTTONDOWN and flappy.flying == False:
+                flappy.flying = True
 
         pygame.display.update()
 
