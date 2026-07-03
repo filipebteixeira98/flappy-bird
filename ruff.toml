@@ -1,0 +1,15 @@
+# Target Python version
+target-version = "py38"
+
+# Same as Black's default line length
+line-length = 88
+
+[lint]
+# Enable Pyflakes (F) and pycodestyle (E) codes by default
+select = ["E", "F", "W", "I"]
+ignore = []
+
+[format]
+# Enable automatic formatting features
+quote-style = "double"
+indent-style = "space"
