@@ -1,4 +1,6 @@
 import pygame
+from pygame.locals import *
+import random
 
 SCREEN_WIDTH = 864
 SCREEN_HEIGHT = 936
@@ -64,6 +66,26 @@ class Bird(pygame.sprite.Sprite):
         else:
             self.image = pygame.transform.rotate(self.images[self.index], -90)
 
+class Pipe(pygame.sprite.Sprite):
+    def __init__(self, x, y, position, pipe_gap):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("assets/sprites/pipe.png")
+        self.rect = self.image.get_rect()
+
+        if position == 1:
+            self.image = pygame.transform.flip(self.image, False, True)
+            self.rect.bottomleft = [x, y - int(pipe_gap / 2)]
+
+        if position == -1:
+            self.rect.topleft = [x, y + int(pipe_gap / 2)]
+    
+    def update(self, ground_speed):
+        self.rect.x -= ground_speed
+        
+        if self.rect.right < 0:
+            self.kill()
+
 def main():
     pygame.init()
 
@@ -73,7 +95,12 @@ def main():
     background_image = pygame.image.load("assets/sprites/bg.png")
     ground_image = pygame.image.load("assets/sprites/ground.png")
 
+    pipe_gap = 150
+    pipe_frequency = 1500
+    last_pipe = pygame.time.get_ticks() - pipe_frequency
+
     bird_group = pygame.sprite.Group()
+    pipe_group = pygame.sprite.Group()
 
     flappy = Bird(100, int(SCREEN_HEIGHT / 2))
 
@@ -94,14 +121,30 @@ def main():
         bird_group.draw(screen)
         bird_group.update(is_game_over)
 
+        pipe_group.draw(screen)
+        pipe_group.update(ground_speed)
+
         screen.blit(ground_image, (ground_scroll, 768))
 
-        if flappy.rect.bottom > 768:
+        if flappy.rect.bottom >= 768:
             is_game_over = True
 
             flappy.flying = False
 
-        if is_game_over == False:
+        if is_game_over == False and flappy.flying == True:
+            time_now = pygame.time.get_ticks()
+
+            if time_now - last_pipe > pipe_frequency:
+                pipe_height = random.randint(-100, 100)
+
+                bottom_pipe = Pipe(SCREEN_WIDTH, int(SCREEN_HEIGHT / 2) + pipe_height, -1, pipe_gap)
+                top_pipe = Pipe(SCREEN_WIDTH, int(SCREEN_HEIGHT / 2) + pipe_height, 1, pipe_gap)
+                
+                pipe_group.add(bottom_pipe)
+                pipe_group.add(top_pipe)
+                
+                last_pipe = time_now
+
             ground_scroll -= ground_speed
 
             if abs(ground_scroll) > 35:
