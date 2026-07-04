@@ -86,6 +86,11 @@ class Pipe(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
+def draw_text(text, font, text_color, x, y, screen):
+    image = font.render(text, True, text_color)
+    
+    screen.blit(image, (x, y))
+
 def main():
     pygame.init()
 
@@ -99,6 +104,10 @@ def main():
     pipe_frequency = 1500
     last_pipe = pygame.time.get_ticks() - pipe_frequency
 
+    font = pygame.font.SysFont("Bauhaus 93", 60)
+
+    font_color = (255, 255, 255)
+
     bird_group = pygame.sprite.Group()
     pipe_group = pygame.sprite.Group()
 
@@ -110,6 +119,9 @@ def main():
     ground_speed = 4
     
     is_game_over = False
+    
+    score = 0
+    pass_pipe = False
 
     run = True
 
@@ -124,6 +136,20 @@ def main():
         pipe_group.draw(screen)
 
         screen.blit(ground_image, (ground_scroll, 768))
+        
+        if len(pipe_group) > 0:
+            if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.left\
+            and bird_group.sprites()[0].rect.right < pipe_group.sprites()[0].rect.right\
+            and pass_pipe == False:
+                pass_pipe = True
+            
+            if pass_pipe == True:
+                if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
+                    score += 1
+
+                    pass_pipe = False
+
+        draw_text(str(score), font, font_color, int(SCREEN_WIDTH / 2), 20, screen)
 
         if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
             is_game_over = True
