@@ -9,6 +9,13 @@ FPS = 60
 
 
 class Bird(pygame.sprite.Sprite):
+    """Representa o pássaro controlado pelo jogador.
+
+    A classe guarda os frames da animação de voo, a posição do pássaro
+    e os estados usados pela física simples do jogo, como velocidade,
+    clique atual e se o pássaro já começou a voar.
+    """
+
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
 
@@ -29,7 +36,15 @@ class Bird(pygame.sprite.Sprite):
         self.flying = False
 
     def update(self, is_game_over):
-        # Gravity
+        """Atualiza física, entrada do jogador e animação do pássaro.
+
+        Quando o jogo está ativo, aplica gravidade, processa o clique
+        para fazer o pássaro subir e alterna os sprites para simular
+        o bater de asas. Quando o jogo acaba, apenas gira o pássaro
+        para indicar queda.
+        """
+
+        # Gravidade: aumenta a velocidade vertical até um limite.
         if self.flying == True:
             self.velocity += 0.5
 
@@ -40,7 +55,7 @@ class Bird(pygame.sprite.Sprite):
                 self.rect.y += int(self.velocity)
 
         if is_game_over == False:
-            # Jump
+            # Pulo: um clique aplica impulso para cima.
             if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 self.clicked = True
                 self.velocity = -10
@@ -48,7 +63,7 @@ class Bird(pygame.sprite.Sprite):
             if pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
 
-            # Animation
+            # Animação: troca o frame do pássaro a cada poucos ciclos.
             self.counter += 1
 
             flap_cooldown = 5
@@ -62,7 +77,7 @@ class Bird(pygame.sprite.Sprite):
 
             self.image = self.images[self.index]
 
-            # Rotation
+            # Rotação: inclina o pássaro conforme ele sobe ou cai.
             self.image = pygame.transform.rotate(
                 self.images[self.index], self.velocity * -2
             )
@@ -71,6 +86,13 @@ class Bird(pygame.sprite.Sprite):
 
 
 class Pipe(pygame.sprite.Sprite):
+    """Representa um cano superior ou inferior.
+
+    O parâmetro ``position`` define se o cano fica em cima ou embaixo.
+    Os canos se movem da direita para a esquerda e são removidos quando
+    saem completamente da tela.
+    """
+
     def __init__(self, x, y, position, pipe_gap):
         pygame.sprite.Sprite.__init__(self)
 
@@ -85,6 +107,8 @@ class Pipe(pygame.sprite.Sprite):
             self.rect.topleft = [x, y + int(pipe_gap / 2)]
 
     def update(self, ground_speed):
+        """Move o cano e remove o sprite quando ele sai da tela."""
+
         self.rect.x -= ground_speed
 
         if self.rect.right < 0:
@@ -92,12 +116,16 @@ class Pipe(pygame.sprite.Sprite):
 
 
 class Button:
+    """Botão simples usado para reiniciar a partida após o fim do jogo."""
+
     def __init__(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
     def draw(self, screen):
+        """Desenha o botão e retorna ``True`` quando ele é clicado."""
+
         action = False
 
         mouse_position = pygame.mouse.get_pos()
@@ -112,12 +140,16 @@ class Button:
 
 
 def draw_text(text, font, text_color, x, y, screen):
+    """Renderiza um texto na tela usando a fonte e a cor informadas."""
+
     image = font.render(text, True, text_color)
 
     screen.blit(image, (x, y))
 
 
 def reset_game(pipe_group, flappy):
+    """Reinicia os elementos principais e devolve a pontuação para zero."""
+
     pipe_group.empty()
 
     flappy.rect.x = 100
@@ -129,6 +161,12 @@ def reset_game(pipe_group, flappy):
 
 
 def main():
+    """Executa a configuração inicial e o loop principal do jogo.
+
+    O loop principal controla desenho, eventos, colisões, pontuação,
+    geração de canos, movimento do chão e reinício da partida.
+    """
+
     pygame.init()
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -166,6 +204,7 @@ def main():
     while run:
         CLOCK.tick(FPS)
 
+        # Desenha o cenário e atualiza os sprites visíveis.
         screen.blit(background_image, (0, 0))
 
         bird_group.draw(screen)
@@ -177,6 +216,7 @@ def main():
 
         screen.blit(ground_image, (ground_scroll, 768))
 
+        # Pontuação: conta um ponto quando o pássaro passa por um par de canos.
         if len(pipe_group) > 0:
             if (
                 bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.left
@@ -197,6 +237,7 @@ def main():
 
         draw_text(str(score), font, font_color, int(SCREEN_WIDTH / 2), 20, screen)
 
+        # Colisões com canos, topo da tela ou chão encerram a partida.
         if (
             pygame.sprite.groupcollide(bird_group, pipe_group, False, False)
             or flappy.rect.top < 0
@@ -208,6 +249,7 @@ def main():
 
             flappy.flying = False
 
+        # Enquanto o jogo está ativo, cria canos periodicamente e move o cenário.
         if is_game_over == False and flappy.flying == True:
             time_now = pygame.time.get_ticks()
 
@@ -233,12 +275,14 @@ def main():
 
             pipe_group.update(ground_speed)
 
+        # Após o fim do jogo, mostra o botão de reinício.
         if is_game_over == True:
             if button.draw(screen) == True:
                 is_game_over = False
 
                 score = reset_game(pipe_group, flappy)
 
+        # Eventos do Pygame: fechar janela e iniciar o voo no primeiro clique.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
